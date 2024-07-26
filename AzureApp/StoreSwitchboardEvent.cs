@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace AzureApp
 {
@@ -20,7 +21,7 @@ namespace AzureApp
             log.LogInformation($"C# HTTP trigger function processed a request.");
 
             var switchboardEvent = ParseQueryStrings(req.Query);
-            log.LogInformation(req.Query.ToString());
+            log.LogInformation(req.QueryString.ToString());
 
             await output.AddAsync(switchboardEvent);
 
