@@ -1,6 +1,7 @@
 ## Capturing and storing events from Mango Voice in an Azure Function
 
 ### Environment Variables
+Can be set in Function App -> Settings -> Environment variables -> App Settings. When created, check Deployment Slot Setting.
 - AzureDbConnectionString - Connection string to Azure DB
 - X-Mango-Remote-ID - Expected Remote ID header (set in [admin.mangovoice.com](https://admin.mangovoice.com))
 
