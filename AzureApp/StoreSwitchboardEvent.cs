@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using Newtonsoft.Json.Linq;
-using Microsoft.AspNetCore.Http.Extensions;
 
 namespace AzureApp
 {
