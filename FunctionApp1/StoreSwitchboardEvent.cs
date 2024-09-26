@@ -4,16 +4,11 @@ using Newtonsoft.Json.Linq;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Sql;
 
-namespace AzureApp
+namespace AzureApp_Isolated
 {
-    public class StoreSwitchboardEvent
+    public class StoreSwitchboardEvent(ILogger<StoreSwitchboardEvent> logger)
     {
-        private readonly ILogger<StoreSwitchboardEvent> _logger;
-
-        public StoreSwitchboardEvent(ILogger<StoreSwitchboardEvent> logger)
-        {
-            _logger = logger;
-        }
+        private readonly ILogger<StoreSwitchboardEvent> _logger = logger;
 
         [Function("StoreSwitchboardEvent")]
         [SqlOutput("dbo.SwitchboardEvents", connectionStringSetting: "AzureDbConnectionString")]
@@ -31,10 +26,12 @@ namespace AzureApp
         private static SwitchboardEvent ParseQueryStrings(IQueryCollection query)
         {
             SwitchboardEvent se = new();
-            JObject customStrings = new();
+            JObject customStrings = [];
 
-            foreach (var pair in query) {
-                switch (pair.Key) {
+            foreach (var pair in query)
+            {
+                switch (pair.Key)
+                {
                     case "callerid": se.CallerId = pair.Value.ToString(); break;
                     case "caller_number": se.CallerNumber = pair.Value.ToString(); break;
                     case "number_dialed": se.NumberDialed = pair.Value.ToString(); break;
@@ -51,11 +48,9 @@ namespace AzureApp
             return se;
         }
 
-        
+
         public struct SwitchboardEvent
         {
-            //[SqlOutput("Mango_InitialStage.SwitchboardEvents", connectionStringSetting: "AzureDbConnectionString")]
-
             public Guid CallId { get; set; }
             public string CallerId { get; set; }
             public string CallerNumber { get; set; }
