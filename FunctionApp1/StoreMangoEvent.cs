@@ -8,22 +8,18 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Azure.Functions.Worker.Http;
 using System.Net;
+using System.Configuration;
 
 namespace AzureApp
 {
-    public class StoreMangoEvent
+    public class StoreMangoEvent(ILogger<StoreMangoEvent> logger)
     {
-        private readonly ILogger<StoreMangoEvent> _logger;
+        private readonly ILogger<StoreMangoEvent> _logger = logger;
 
-        public StoreMangoEvent(ILogger<StoreMangoEvent> logger)
-        {
-            _logger = logger;
-        }
-
-        [Function("StoreMangoEvent")]        
-        public async Task<Output> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "mango_event")] HttpRequest req,
-            FunctionContext context)
+        [Function("StoreMangoEvent")]
+        [SqlOutput("dbo.MangoEvents", connectionStringSetting: "AzureDbConnectionString")]
+        public async Task<MangoEventDTO> Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "mango_event")] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -36,13 +32,13 @@ namespace AzureApp
                 {
                     string error = "Missing header \"X-Mango-Remote-ID\"";
                     _logger.LogInformation(error);
-                    return new Output(error);
+                    return null;
                 }
                 else if (remoteIdHeader[0] != remoteId)
                 {
                     string error = $"Invalid header \"X-Mango-Remote-ID\": {remoteIdHeader[0]}";
                     _logger.LogInformation(error);
-                    return new Output(error);
+                    return null;
                 }
             }
             else
@@ -56,9 +52,7 @@ namespace AzureApp
 
             _logger.LogInformation(mangoEvent.ToString());
 
-            MangoEventDTO dto = new(mangoEvent);
-
-            return new Output(dto);
+            return new MangoEventDTO(mangoEvent);
         }
     }
 
@@ -85,7 +79,6 @@ namespace AzureApp
 
     public class MangoEventDTO    
     {
-        [Key]
         public Guid Id { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime SentAt { get; private set; }
@@ -99,24 +92,5 @@ namespace AzureApp
             Type = mangoEvent.Type;
             Payload = mangoEvent.Payload.ToString();
         }
-    }
-
-    public class Output
-    {
-        public Output(string errorMessage)
-        {
-            Response = new BadRequestObjectResult(errorMessage);
-        }
-        public Output(MangoEventDTO dto)
-        {
-            DTO = dto;
-            Response = new OkResult();
-        }
-
-        [SqlOutput("dbo.MangoEvents", "AzureDbConnectionString")]
-        public MangoEventDTO? DTO { get; private set; }
-
-        [HttpResult]
-        public IActionResult Response { get; private set; }
     }
 }
