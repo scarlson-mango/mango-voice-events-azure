@@ -16,7 +16,9 @@ namespace AzureApp
         }
 
         [Function("StoreSwitchboardEvent")]
-        public SwitchboardEvent Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "switchboard_event")] HttpRequest req)
+        [SqlOutput("dbo.SwitchboardEvents", connectionStringSetting: "AzureDbConnectionString")]
+        public SwitchboardEvent Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "switchboard_event")] HttpRequest req)
         {
             _logger.LogInformation($"C# HTTP trigger function processed a request.");
 
@@ -49,9 +51,10 @@ namespace AzureApp
             return se;
         }
 
+        
         public struct SwitchboardEvent
         {
-            [SqlOutput("dbo.SwitchboardEvents", "AzureDbConnectionString")]
+            //[SqlOutput("Mango_InitialStage.SwitchboardEvents", connectionStringSetting: "AzureDbConnectionString")]
 
             public Guid CallId { get; set; }
             public string CallerId { get; set; }
